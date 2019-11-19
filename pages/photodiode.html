@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Photodiode</title>
+</head>
+<body>
+    <pre>
+        <code>
+            unsigned const int A = 13;
+            unsigned const int B = 12;
+            unsigned const int C = 11;
+            unsigned const int D = 10;
+            unsigned const int E = 9;
+            unsigned const int F = 8;
+            unsigned const int G = 7;
+            unsigned const int H = 6;
+
+            int sensor = A0;
+            int light = 0;
+
+            void setup()  { 
+            pinMode(A, OUTPUT);
+            pinMode(B, OUTPUT);
+            pinMode(C, OUTPUT);
+            pinMode(D, OUTPUT);
+            pinMode(E, OUTPUT);
+            pinMode(F, OUTPUT);
+            pinMode(G, OUTPUT);
+            pinMode(H, OUTPUT);
+            
+            } 
+
+
+            void zero(void) {
+            digitalWrite(A, LOW);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, HIGH);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, HIGH);
+            digitalWrite(H, LOW);
+            }
+
+            void one(void) {
+            digitalWrite(A, LOW);
+            digitalWrite(B, LOW);
+            digitalWrite(C, LOW);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, LOW);
+            digitalWrite(F, LOW);
+            digitalWrite(G, HIGH);
+            digitalWrite(H, LOW);
+            }
+
+            void two(void) {
+            digitalWrite(A, HIGH);
+            digitalWrite(B, LOW);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, HIGH);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, LOW);
+            digitalWrite(H, LOW);
+            }
+
+            void three(void) {
+            digitalWrite(A, HIGH);
+            digitalWrite(B, LOW);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, LOW);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, HIGH);
+            digitalWrite(H, LOW);
+            }
+
+            void four(void) {
+            digitalWrite(A, HIGH);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, LOW);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, LOW);
+            digitalWrite(F, LOW);
+            digitalWrite(G, HIGH);
+            digitalWrite(H, LOW);
+            }
+
+            void five(void) {
+            digitalWrite(A, HIGH);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, LOW);
+            digitalWrite(E, LOW);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, HIGH);
+            digitalWrite(H, LOW);
+            }
+
+            void six(void) {
+            digitalWrite(A, HIGH);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, LOW);
+            digitalWrite(E, HIGH);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, HIGH);
+            digitalWrite(H, LOW);
+            }
+
+            void seven(void) {
+            digitalWrite(A, LOW);
+            digitalWrite(B, LOW);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, LOW);
+            digitalWrite(F, LOW);
+            digitalWrite(G, HIGH);
+            digitalWrite(H, LOW);
+            }
+
+            void eight(void) {
+            digitalWrite(A, HIGH);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, HIGH);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, HIGH);
+            digitalWrite(H, LOW);
+            }
+
+            void nine(void) {
+            digitalWrite(A, HIGH);
+            digitalWrite(B, HIGH);
+            digitalWrite(C, HIGH);
+            digitalWrite(D, HIGH);
+            digitalWrite(E, LOW);
+            digitalWrite(F, HIGH);
+            digitalWrite(G, HIGH);
+            digitalWrite(H, LOW);
+            }
+
+            void loop()  { 
+            
+            light = analogRead(A0);	
+            if (light != 0) {
+                light = map(light, 64, 85, 0, 9);
+            }
+            
+            switch (light) {
+                case 0:
+                    zero();
+                    break;
+                case 1:
+                    one();
+                    break;
+                case 2:
+                    two();
+                    break;
+                case 3:
+                    three();
+                    break;
+                case 4:
+                    four();
+                    break;
+                case 5:
+                    five();
+                    break;
+                case 6:
+                    six();
+                    break;
+                case 7:
+                    seven();
+                    break;
+                case 8:
+                    eight();
+                    break;
+                case 9:
+                    nine();
+                    break;
+            }
+
+            delay(100);  
+            
+            }
+        </code>
+    </pre>
+    <p>
+        Результат:
+        Фотодиод будет отдавать значения
+        освещения. Код конвертирует
+        их по шкале 0-9 и выведет
+        на семисегментный дисплей. 
+        При изменении освещения цифры
+        на дисплее будут меняться.
+        <a href="https://www.tinkercad.com/things/9T9vRrpdd0v-photodiode-counter" target="_blank">Ссылка на проект</a>
+    </p>
+    <img alt="arduinoImage" src="../img/photodiode.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

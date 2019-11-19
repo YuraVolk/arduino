@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Tilt Sensor 4 pin</title>
+</head>
+<body>
+    <pre>
+        <code>
+            int ledPin = 8;
+            int sensorPin = 9;
+            int slide = A0;
+            int piezo = 10;
+
+            void setup(){
+            pinMode(ledPin, OUTPUT);
+            pinMode(sensorPin, INPUT);
+            Serial.begin(9600);
+            }
+
+            void loop(){
+            int val = digitalRead(sensorPin);
+            int switched = analogRead(slide);
+            
+            if(switched == 0){
+                digitalWrite(ledPin, HIGH);
+            } else {
+                digitalWrite(ledPin, LOW);
+            } 
+            if (val == HIGH) {
+                tone(piezo, 650);
+                Serial.println(val);
+                } else {
+                noTone(piezo);
+                }
+            }
+        </code>
+    </pre>
+    <p>
+        Результат:
+        Датчик можно включить и выключить. 
+        Если он выключен, загорится светодиод. 
+        Если он включен и под наклоном,
+        просигнализирует пьезо элемент.
+        <a href="https://www.tinkercad.com/things/7QNsFYokL3N-quake-system" target="_blank">Ссылка на проект</a>
+    </p>
+    <img alt="arduinoImage" src="../img/tiltsensorpin.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>
