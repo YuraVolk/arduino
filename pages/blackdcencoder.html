@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bridge</title>
+</head>
+<body>
+    <pre>
+        <code>
+                #include  &lt;LiquidCrystal.h&gt;
+
+                LiquidCrystal lcd(1, 0, 9, 8, 7, 6);
+                
+                int value;
+                float PIDinMin = 100;
+                float PIDinMax = 4096;
+                float PIDrange = PIDinMax - PIDinMin;
+                
+                float PIDoutMin = 100;
+                float PIDoutMax = 4096;
+                
+                float Setpoint;
+                
+                float kdScaleFactor = 10.0;
+                
+                #define PWMpin  5
+                
+                float Target = 40000.0;
+                float Input;
+                float Output;
+                float inputMin = 4000.0;
+                float inputMax = 40000.0;
+                float inputRange = inputMax - inputMin;
+                
+                float outMin = 0;
+                float outMax = 255;
+                float outRangeFactor = outMax / PIDoutMax;
+                float inRangeFactor = PIDrange / inputRange;
+                
+                int dirn = -1;
+                float kp = 1;
+                float ki = 0.2;
+                float kd = 0.1;
+                float minInterval = 1000.0;
+                
+                int PulsesPerRevolution = 1; 
+                unsigned long sensorInterval;
+                
+                unsigned long PIDstart, PIDend, PIDduration;
+                
+                volatile unsigned long ISRinterval;
+                volatile bool newISR = false;
+                
+                #define encoder0PinA 2
+                #define encoder0PinB 3
+                #define encoder0PinSwitch 4
+                
+                volatile char encoder0Pos = 0;
+                volatile boolean encoder0Switch = 0;
+                volatile char encoderBPos = 0;
+                unsigned int tmp = 0;
+                
+                float speed = 0.0;
+                
+                
+                void setup() {
+                 
+                  
+                  pinMode(encoder0PinA, INPUT_PULLUP); 
+                  pinMode(encoder0PinB, INPUT_PULLUP);
+                  pinMode(encoder0PinSwitch, INPUT_PULLUP);
+                  
+                
+                  Setpoint = (Target - inputMin) * inRangeFactor;
+                  pinMode(PWMpin, OUTPUT);
+                  
+                  analogWrite(PWMpin, 150);
+                  delay(200);
+                  
+                  PIDcompute(); 
+                  delay(100);
+                  PIDcompute();
+                   lcd.print("Speed: ");
+                  lcd.print((int) speed);
+                  lcd.print(" km/h");
+                 
+                }
+                
+                void loop(){
+                  readRpm();
+                }
+                
+                
+                void readRpm() {
+                    if(!newISR) return;
+                
+                    sensorInterval = ISRinterval;
+                    newISR = false;
+                
+                    Input = ((float) sensorInterval - inputMin) * inRangeFactor;
+                
+                    Serial.println(sensorInterval, DEC);    
+                    Serial.println(Input, DEC);
+                  
+                    if (Input > PIDinMax) {
+                        Input = PIDinMax;
+                    }
+                    if (Input < PIDinMin) {
+                        Input = PIDinMin;
+                    }
+                
+                    PIDcompute();
+                    Output = Output * outRangeFactor;
+                    analogWrite(PWMpin, Output ); 
+                }
+                
+                
+                void PIDcompute() {
+                    static unsigned long prevInput;
+                    static unsigned long prevPIDtime;
+                    static float ITerm;
+                
+                
+                    unsigned long PIDtime = micros();
+                    unsigned long PIDinterval = PIDtime - prevPIDtime;
+                    prevPIDtime = PIDtime;
+                
+                    float DTerm = 0;
+                    float derivative = 0;
+                
+                    float error = Setpoint - Input;
+                  
+                    float PTerm = kp * error * dirn;
+                    float timeFraction =  minInterval / (float) PIDinterval;
+                    float ITadj = error * timeFraction * ki * dirn;
+                    ITerm += ITadj;
+                    if((ITerm > PIDoutMax) || (ITerm < PIDoutMin) ) {
+                        ITerm -= ITadj; 
+                    }
+                    if(ITerm > PIDoutMax) { 
+                       ITerm = PIDoutMax;  
+                     }
+                    if(ITerm < PIDoutMin) {
+                        ITerm = PIDoutMin;
+                    }
+                
+                    derivative = (prevInput - Input)  * timeFraction; 
+                    prevInput = Input;
+                    DTerm = kd * derivative * dirn * kdScaleFactor;
+                
+                
+                    float output = PTerm + ITerm + DTerm ;
+                    if (output < -5 || output > 5) {
+                       speed = 4.5 * fabs(output) * 0.001885;
+                    }
+                
+                    if(output > PIDoutMax) {
+                        output = PIDoutMax;
+                    }
+                    else if (output < PIDoutMin)  {
+                        output = PIDoutMin;
+                    }
+                
+                    Output = output;
+                }
+                    
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 1 n-канальный МОП-транзистор (полевой транзистор с МОП-Структурой)</li>
+            <li> 2 резистора на 1k&Omega;</li>
+            <li> 1 резистор на 5k&Omega;</li>
+            <li> 1 резистор на 220&Omega;</li>
+            <li> 1 резистор на 1&Omega;</li>
+            <li> 1 индуктор на 100GH</li>
+            <li> 2 конденсатора на 10nF</li>
+            <li> 1 мультиметр в режиме "Сила тока"</li>
+            <li> 1 Источник питания с напряжением 30 и током 5.</li>
+            <li> 1 Двигатель постоянного тока с энкодером (серый) с 2737 Об/мин.</li>
+            <li> 1 ЖК-Экран</li>
+            <li> 1 Ползунковый переключатель.</li>
+            <li> 2 малых макетных платы.</li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Мотор будет крутиться,
+        и LCD дисплей будет
+        выводить его скорость
+        в км/ч. Мотор с энкодером,
+        поэтому он безопасный и
+        контроллируется только Arduino 
+        в данной схеме. Мультиметр
+        выводит напряжение. 
+      </p>
+      <a href="https://www.tinkercad.com/things/2L4U8mVwquf-black-dc-motor-with-encoder-" target="_blank">Ссылка на проект</a>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/blackdcencoder.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

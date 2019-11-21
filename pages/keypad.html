@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bridge</title>
+</head>
+<body>
+    <pre>
+        <code>
+            #include  &lt;KeyPad.h&gt;
+                #include  &lt;LiquidCrystal.h&gt;
+                
+                LiquidCrystal lcd(1, 0, 13, 12, 11, 10);
+                
+                const byte numRows= 4; 
+                const byte numCols= 4; 
+                
+                char keymap[numRows][numCols]= 
+                {
+                {'1', '2', '3', 'A'}, 
+                {'4', '5', '6', 'B'}, 
+                {'7', '8', '9', 'C'},
+                {'*', '0', '#', 'D'}
+                };
+                
+                byte rowPins[numRows] = {9,8,7,6};
+                byte colPins[numCols]= {5,4,3,2}; 
+                
+                Keypad myKeypad = Keypad(makeKeymap(keymap), rowPins, colPins, numRows, numCols);
+                
+                void setup() {
+                   lcd.begin(16, 1);
+                }
+                
+                void loop() {
+                  
+                  
+                    char keypressed = myKeypad.getKey();
+                      if (keypressed != NO_KEY) {
+                      if (keypressed == '#') {
+                        lcd.clear();
+                        lcd.print("Calling");
+                        delay(260);
+                        lcd.print(".");
+                        delay(260);
+                        lcd.print(".");
+                        delay(260);
+                        lcd.print(".");
+                        delay(300);
+                        lcd.clear();
+                        lcd.print("No money.");
+                        delay(1000);
+                        lcd.clear();
+                      } else {
+                        if (keypressed == '*') {
+                        lcd.print("-");
+                        } else {
+                          lcd.print(keypressed);
+                        }
+                      }
+                      
+                      
+                    }
+                }
+                
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 1 Клавиатура 4 * 4.</li>
+            <li> 1 ЖК-экран.</li>
+            <li> 1 Стабилитрон с напряжением 5.10kV.</li>
+            <li> 1 Ползунковый переключатель.</li>
+            <li> 1 Разъем с 8 выводами.</li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Можно набирать
+        номер и звонить по нему.
+      </p>
+      <a href="https://www.tinkercad.com/things/0FqS2AgPdms-public-telephone/editel" target="_blank">Ссылка на проект</a>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/keypad.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

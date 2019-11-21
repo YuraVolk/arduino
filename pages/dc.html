@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bridge</title>
+</head>
+<body>
+    <pre>
+        <code>
+            const int motor = 11;
+            const int pt = A0;
+
+            byte vmotor = 255;
+            void setup() {
+            Serial.begin(9600);
+            }
+
+
+            int p = 0;
+
+            void loop() {
+            p = analogRead(pt);
+            if ((p>=0) && (p&lt;512)) {
+                vmotor = 127;
+            } else {
+                vmotor = 0;
+            }
+            
+            analogWrite(motor, vmotor);
+            }
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 1 Источник питания с напряжением 6 и током 1.</li>
+            <li> 1 Потенциометр.</li>
+            <li> 1 n-канальный МОП-транзистор (полевой транзистор с МОП-Структурой)</li>
+            <li> 1 NPN-транзистор (биополярный)</li>
+            <li> 1 диод</li>
+            <li> 1 двигатель постоянного тока</li>
+            <li> 1 резистор на 1k&Omega;</li>
+            <li> 1 резистор на 10k&Omega;</li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Мотор крутится и его скорость
+        можно регулировать через 
+        потенциометр.
+      </p>
+      <a href="https://www.tinkercad.com/things/lxCl5bozZ9j-single-dc-motor-with-speed-regulation/" target="_blank">Ссылка на проект</a>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/dc.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

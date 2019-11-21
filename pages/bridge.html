@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bridge</title>
+</head>
+<body>
+    <pre>
+        <code>
+            int en1=11;
+            int en2=10;
+            int in1=12;
+            int in2=13;
+            int in3=9;
+            int in4=8;
+
+            void setup()
+            {
+            pinMode(en1,OUTPUT);
+            pinMode(in1,OUTPUT);
+            pinMode(in2,OUTPUT);
+            pinMode(en2,OUTPUT);
+            pinMode(in3,OUTPUT);
+            pinMode(in4,OUTPUT);
+            }
+
+            void forwrad(int in, int out)
+            {
+            analogWrite(en1,in);
+            digitalWrite(in1, HIGH);
+            digitalWrite(in2, LOW);
+            analogWrite(en2,out);
+            digitalWrite(in3, HIGH);
+            digitalWrite(in4, LOW);
+            }
+
+            void back(int in, int out) {
+            analogWrite(en1,in);
+            digitalWrite(in1, LOW);
+            digitalWrite(in2, HIGH);
+            analogWrite(en2,out);
+            digitalWrite(in3, LOW);
+            digitalWrite(in4, HIGH);
+            }
+
+            void loop()
+            {
+            forwrad(100,100);
+            delay(2000);
+            back(100,100);
+            delay(2000);
+            }
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 1 Электрический привод с H-мостом.</li>
+            <li> 2 Двигателя постоянного тока.</li>
+            <li> 1 Батарея 9 В.</li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Два мотора крутятся
+        одновременно. Ими 
+        управляет и их соединяет 
+        L293D.
+      </p>
+      <a href="https://www.tinkercad.com/things/blSXhxJjZXc-bridge-motor-controller" target="_blank">Ссылка на проект</a>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/bridge.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>
