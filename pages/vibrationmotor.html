@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Vibration Motor</title>
+</head>
+<body>
+    <pre>
+        <code>
+            void setup()
+            {
+            for (int i = 1; i < 14; i++) {
+                pinMode(i, OUTPUT);
+            }
+            }
+
+            void loop()
+            {
+            for (int i = 1; i < 16; i++) {
+                analogWrite( i - 1 , 200 );
+                analogWrite( i , 300 );
+                analogWrite( i + 1 , 200 );
+                
+                delay(200);
+            }
+            
+            for (int i = 1; i < 16; i++) {
+                analogWrite( i , 0 );
+                
+                delay(200);
+            }
+            }
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 12 виброприводов.</li>
+            <li> 12 n-канальных МОП-транзисторов (полевых транзисторов с МОП-Структурой).</li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Моторы вибрируют по циклу.
+      </p>
+      <a href="https://www.tinkercad.com/things/e2bhRaA37cJ-vibration-strip/" target="_blank">Ссылка на проект</a>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/vibrationmotor.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

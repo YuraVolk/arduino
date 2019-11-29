@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Relay LU-5-3L</title>
+</head>
+<body>
+    <pre>
+        <code>
+        int pos = 0;
+
+        void setup()
+        {
+        pinMode(8, OUTPUT);
+        pinMode(6, OUTPUT);
+        pinMode(7, OUTPUT);
+        }
+
+        void loop()
+        {
+        noTone(8);
+        
+        tone(6, 880, 200);
+        delay(200); 
+
+        noTone(6);
+        
+        tone(7, 988, 500);
+        delay(500); 
+
+        noTone(7);
+        
+        tone(8, 1047, 300); 
+        delay(300); 
+        }
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 3 пьезоэлемента </li>
+            <li> 1 источник питания с напряжением 5 и током 5 </li>
+            <li> 1 пироэлектрический ИК-датчик </li>
+            <li> 3 резистора на 1k&Omega;</li>
+            <li> 3 однополюсных реле</li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        При движение запищат
+        пьезоэлементы.
+        Кол-Во тестов - 3.
+      </p>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/relayblack.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

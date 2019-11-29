@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dip Switch * 6</title>
+</head>
+<body>
+    <pre>
+        <code>
+            void setup()
+            {
+            for (int i = 13; i != 7; i--) {
+                pinMode(i, INPUT);
+            }
+            
+            pinMode(7, OUTPUT);
+            pinMode(6, OUTPUT);
+            pinMode(5, OUTPUT);
+            pinMode(4, OUTPUT);
+            pinMode(3, OUTPUT);
+            pinMode(2, OUTPUT);
+            Serial.begin(9600);
+            }
+
+            void loop()
+            {
+            digitalWrite(7, digitalRead(13));
+            digitalWrite(6, digitalRead(12));
+            digitalWrite(5, digitalRead(11));
+            digitalWrite(4, digitalRead(10));
+            digitalWrite(3, digitalRead(9));
+            digitalWrite(2, digitalRead(8));
+            }
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 1 шесть однополюсных dip переключателей.</li>
+            <li> 6 резисторов на 1k&Omega;.</li>
+            <li> 6 моторов-редукторов</li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Шесть моторов-редукторов не крутятся,
+        но их можно включить. Таким 
+        образом можно задать направление
+        и скорость передвижения.
+      </p>
+      <a href="https://www.tinkercad.com/things/e8fBGqVh3xf-6-wheel-transport/" target="_blank">Ссылка на проект</a>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/dipswitch6.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>741</title>
+</head>
+<body>
+    <pre>
+        <code>
+            void setup()
+            {
+              Serial.begin(9600);
+              pinMode(0, OUTPUT);
+              pinMode(1, OUTPUT);
+            }
+            
+            void loop()
+            {
+               digitalWrite(0, HIGH);
+            }
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 2 конденсатора на 100nF (правые нижние)</li>
+            <li> 1 конденсатор на 100µF (левый верхний)</li>
+            <li> 2 поляризованных конденсатора на 1µF и напряжением 16V </li>
+            <li> 1 резистор на 5k&Omega; </li>
+            <li> 2 резистора на 1k&Omega; </li>
+            <li> 1 резистор на 10k&Omega; </li>
+            <li> 1 резистор на 20k&Omega; </li>
+            <li> 1 резистор на 50k&Omega; </li>
+            <li> 1 резистор на 100k&Omega; </li>
+            <li> 1 генератор сигнала с частотой 1000 герц, ампилтудой 2V, и сдвигом 0 (левый)</li>
+            <li> 1 генератор сигнала с частотой 1 герц, ампилтудой 0.2V, и сдвигом 0 (праый)</li>
+            <li> 2 мультиметра в режиме "Напряжение"</li>
+            <li> 1 осциллограф с продолжительностью 1ms (самый левый)</li>
+            <li> 2 осциллографа с продолжительностью 100ms </li>
+            <li> 1 источник питания с напряжением 5 и током 4.10</li>
+            <li> 2 источника питания с напряжением 12 и током 5</li>
+            <li> 3 операционных усилителя 741</li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Напряжение будут выравниваться. 
+        Кол-Во тестов - 8.
+      </p>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/741.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

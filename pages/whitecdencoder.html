@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>White DC Motor with Encoder</title>
+</head>
+<body>
+    <pre>
+        <code>
+            #include &lt;Encoder.h&gt;
+                #include  &lt;LiquidCrystal.h&gt;
+                
+                LiquidCrystal lcd(13, 12, 3, 2, 1, 0);
+                Encoder enc_a(10, 11);
+                Encoder enc_b(6, 7);
+                int	left_a = 4;
+                int	right_a = 5;
+                bool a = 0;
+                int	left_b = 8;
+                int	right_b = 9;
+                bool b = 0;
+                
+                void setup() {
+                  lcd.begin(16,1);
+                  pinMode(left_a, OUTPUT);
+                  pinMode(right_a, OUTPUT);
+                  pinMode(left_b, OUTPUT);
+                  pinMode(right_b, OUTPUT);
+                }
+                
+                void loop() {
+                  lcd.clear();
+                  if (analogRead(A0) != 1023) {
+                    digitalWrite(left_a, 0);
+                    digitalWrite(right_a, 0);
+                    if (analogRead(A1) != 1023) {
+                      if (analogRead(A0) != 1023) {
+                          lcd.print("Speed: 0kph");
+                      } else {
+                        lcd.print("Speed: 16kph");
+                      }
+                    } else {
+                      if (analogRead(A0) != 1023) {
+                          lcd.print("Speed: 16kph");
+                      } else {
+                        lcd.print("Speed: 32kph");
+                      }
+                    }
+                  } else {
+                    digitalWrite(left_a, a);
+                    digitalWrite(right_a, !a);
+                    if (analogRead(A1) != 1023) {
+                      lcd.print("Speed: 16kph");
+                    } else {
+                      lcd.print("Speed: 32kph");
+                    }
+                  }
+                  
+                   if (analogRead(A1) != 1023) {
+                    digitalWrite(left_b, 0);
+                      digitalWrite(right_b, 0);
+                    
+                  } else {
+                    digitalWrite(left_b, b);
+                      digitalWrite(right_b, !b);
+                  }
+                  
+                
+                  long x = enc_a.read();
+                  long y = enc_b.read();
+                
+                  if (x > 60)
+                    a = 0;
+                  if (x < -60)
+                    a = 1;
+                  if (y > 60)
+                    b = 0;
+                  if (y < -60)
+                    b = 1;
+                  delay(200);
+                }
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 2 двигателя постоянного тока с энкодером (белых) с 1621 об/мин.</li>
+            <li> 1 электрический привод с H-мостом</li>
+            <li> 2 Батареи 9 В.</li>
+            <li> 3 ползунковых переключателя.</li>
+            <li> 1 резистор на 500&Omega;.</li>
+            <li> 1 макетная плата и 1 мини макетная плата.</li>
+            <li> 1 ЖК-Экран.</li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Два мотора крутятся
+        одновременно. Ими 
+        управляет и их соединяет 
+        L293D. Из мануала известно, 
+        что моторы нельзя взломать.
+        Также моторы можно включить 
+        и выключить. Скорость 
+        в км/ч будет выводиться на
+        ЖК-Экран.
+      </p>
+      <a href="https://www.tinkercad.com/things/cPHVN4oSMq7-two-white-dc-motors-with-encoders/" target="_blank">Ссылка на проект</a>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/whitedcmotor.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

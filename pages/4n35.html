@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>4N35</title>
+</head>
+<body>
+    <pre>
+        <code>
+            void setup()
+            {
+            for (int i = -1; i < 14; i++) {
+                pinMode(i, OUTPUT);
+            digitalWrite(i, HIGH); 
+            }
+            }
+
+            void loop()
+            {
+            digitalWrite(0, HIGH);
+            digitalWrite(1, HIGH);
+                digitalWrite(2, HIGH);
+            delay(1000); // Wait for 1000 millisecond(s)
+            digitalWrite(0, LOW);
+            digitalWrite(1, LOW);
+            digitalWrite(2, LOW);
+            delay(1000); // Wait for 1000 millisecond(s)
+            }
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 3 двигателя постоянного тока</li>
+            <li> 3 4N35</li>
+            <li> 3 NPN-транзистора </li>
+            <li> 3 резистора на 2k&Omega; </li>
+            <li> 3 резистора на 25&Omega; </li>
+            <li> 3 мультиметра в режиме "Сила тока"</li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Моторы будут крутиться и 
+        останавливаться.
+        Кол-Во тестов - 2.
+      </p>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/4n35.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

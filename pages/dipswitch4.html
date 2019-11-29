@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dip Switch * 6</title>
+</head>
+<body>
+    <pre>
+        <code>
+            void setup()
+            {
+            pinMode(7, INPUT);
+            pinMode(6, INPUT);
+            pinMode(5, INPUT);
+            pinMode(4, INPUT);
+            pinMode(3, OUTPUT);
+            pinMode(2, OUTPUT);
+            pinMode(1, OUTPUT);
+            Serial.begin(9600);
+            }
+
+            void loop()
+            {
+            if (digitalRead(7) == 0) {
+                RGB_color(map(digitalRead(6), 0, 1, 0, 255),
+                map(digitalRead(5), 0, 1, 0, 255),
+                map(digitalRead(4), 0, 1, 0, 255));
+            } else {
+                RGB_color(map(digitalRead(4), 0, 1, 0, 255),
+                map(digitalRead(5), 0, 1, 0, 255),
+                map(digitalRead(6), 0, 1, 0, 255));
+            }
+            }
+
+            void RGB_color(int red_light_value, int green_light_value, int blue_light_value)
+            {
+            Serial.println(red_light_value);
+            
+            Serial.println(green_light_value);
+            Serial.println(blue_light_value);
+            
+            analogWrite(3, red_light_value);
+            analogWrite(2, green_light_value);
+            analogWrite(1, blue_light_value);
+            }
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 1 четыре двухполюсных dip переключателей.</li>
+            <li> 4 резистора на 1k&Omega;.</li>
+            <li> 3 резистора на 220&Omega;.</li>
+            <li> 1 RGB-светодиод.</li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Можно настраивать цвет светодиода.
+      </p>
+      <a href="https://www.tinkercad.com/things/iihj8xzKP70-customizable-rgb-led/" target="_blank">Ссылка на проект</a>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/dipswitch4.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

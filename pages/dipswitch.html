@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dip Switch</title>
+</head>
+<body>
+    <pre>
+        <code>
+            void setup()
+            {
+            pinMode(0, OUTPUT);
+            }
+
+            void loop()
+            {
+            digitalWrite(0, digitalRead(1));
+            }
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 1 лампа накаливания.</li>
+            <li> 1 резистор на 500&Omega;.</li>
+            <li> 1 двухполюсный dip переключатель</li>
+            <li> 1 конденсатор на 100nF</li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Лампу можно включить и выключить.
+      </p>
+      <a href="https://www.tinkercad.com/things/ifmusFiCS8o-light-bulb/" target="_blank">Ссылка на проект</a>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/switchdip.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>
