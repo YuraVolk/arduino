@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Pololu</title>
+</head>
+<body>
+    <pre>
+        <code>
+        
+        #include &lt;Servo.h> 
+
+        Servo motor;
+        
+        #define PIN_POTENTIOMETER 2
+        #define PIN_PWM 9
+        int val; 
+         int encoder0PinA = 3;
+         int encoder0PinB = 4;
+         int encoder0Pos = 0;
+         int encoder0PinALast = LOW;
+         int n = LOW;
+        
+        void setup() {
+          pinMode (encoder0PinA,INPUT);
+           pinMode (encoder0PinB,INPUT);
+           Serial.begin (9600);
+          motor.attach(PIN_PWM);
+        
+        }
+        
+        void loop() {
+          int potValue = analogRead(PIN_POTENTIOMETER);
+          int speed = map(potValue, 0, 1023, 0, 255);
+          motor.write(speed);
+         n = digitalRead(encoder0PinA);
+           if ((encoder0PinALast == LOW) && (n == HIGH)) {
+             if (digitalRead(encoder0PinB) == LOW) {
+               encoder0Pos--;
+             } else {
+               encoder0Pos++;
+             }
+             Serial.print (speed);
+             Serial.print ("/");
+           } 
+           encoder0PinALast = n;
+          delay(10);
+        }
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 1 Pololu </li>
+            <li> 1 источник питания с напряжением 12 и током 12 </li>
+            <li> 1 потенциометр </li>
+            <li> 1 двигатель постоянного тока с энкодером на 1621 об/мин </li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Вы сможете регулировать скорость мотора.
+        Кол-Во тестов - 2.
+      </p>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/pololu.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

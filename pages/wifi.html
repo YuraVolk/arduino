@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Wifi Module</title>
+</head>
+<body>
+    <pre>
+        <code>
+                #include &lt;LiquidCrystal.h>
+                #include &lt;string.h> // we'll need this for subString
+                
+                LiquidCrystal lcd(12, 11, 5, 4, 3, 2 ); 
+                const byte numChars = 50;
+                char receivedChars[numChars];
+                char tempChars[numChars];  
+                char messageFromSerial[numChars] = {0};
+                char SSIDfromSerial[numChars] = {0};
+                int rssiFromSerial = 0;
+                
+                boolean newData = false;
+                
+                String ssid     = "Simulator Wifi";	
+                String password = ""; 
+                const int redPin = A5;
+                const int greenPin = A4;
+                const int bluePin = A3;
+                
+                const int redPinA = 10; 
+                const int greenPinA = 6; 
+                const int bluePinA = 7; 
+                
+                void setup() {
+                 lcd.begin(16, 2);
+                 
+                 pinMode(redPin, OUTPUT); 
+                 pinMode(greenPin, OUTPUT); 
+                 pinMode(bluePin, OUTPUT); 
+                 pinMode(redPinA, OUTPUT);
+                 pinMode(greenPinA, OUTPUT);
+                 pinMode(bluePinA, OUTPUT);
+                
+                
+                 Serial.begin(115200);
+                
+                   
+                 lcd.setCursor(0,0); 
+                 lcd.print("Connecting to:...");
+                 lcd.setCursor(0,1);
+                 lcd.print(ssid); // write the name of your wifi network to lcd
+                 Serial.println("AT");
+                 Serial.println("AT");
+                 delay(10);
+                 String outstr = Serial.readString();
+                  
+                 if (!outstr.startsWith("OK"))
+                  {
+                    lcd.setCursor(0,0);
+                    lcd.print("No ESP-01");
+                    colorA(255,165,0);
+                 } else{
+                    colorA(0, 0, 255); 
+                    delay(10);
+                  }
+                
+                
+                  Serial.println("AT+CWJAP=\"" + ssid + "\",\"" + password + "\"");
+                  delay(10);			
+                  if (!Serial.find("OK"))
+                  {
+                    lcd.setCursor(0,0);
+                    lcd.print("no WiFi");
+                    colorA(255, 0, 0);
+                  }else{
+                    colorA(0,255, 0);
+                  }
+                }
+                
+                void loop() {
+                lcd.clear();
+                 Serial.println("AT+CWLAP");
+                 delay(10);	
+                
+                   while (Serial.available() > 0) {
+                      
+                      recvWithStartEndMarkers();
+                      
+                      if (newData == true) {
+                          strcpy(tempChars, receivedChars);
+                          parseData();
+                          showParsedData();
+                          newData = false;
+                              }
+                    }
+                }
+                void recvWithStartEndMarkers() {
+                    static boolean recvInProgress = false;
+                    static byte ndx = 0;
+                    char startMarker = '('; 
+                    char endMarker = ')';
+                    char rc;
+                
+                    while (Serial.available() > 0 && newData == false) {
+                        rc = Serial.read();
+                
+                        if (recvInProgress == true) {
+                            if (rc != endMarker) {
+                                receivedChars[ndx] = rc;
+                                ndx++;
+                                if (ndx >= numChars) {
+                                    ndx = numChars - 1;
+                                }
+                            }
+                            else {
+                                receivedChars[ndx] = '\0'; 
+                                recvInProgress = false;
+                                ndx = 0;
+                                newData = true;
+                            }
+                        }
+                
+                        else if (rc == startMarker) {
+                            recvInProgress = true;
+                        }
+                    }
+                }
+                
+                
+                void parseData() {   
+                
+                    char * strtokIndx; 
+                
+                    strtokIndx = strtok(tempChars,",");      
+                    strcpy(messageFromSerial, strtokIndx);
+                
+                    strtokIndx = strtok(NULL,",");    
+                    strcpy(SSIDfromSerial, strtokIndx); 
+                
+                    strtokIndx = strtok(NULL, ",");
+                    rssiFromSerial = atoi(strtokIndx);     
+                
+                }
+                
+                void showParsedData() {
+                        
+                 if (rssiFromSerial > -50) {
+                 lcd.clear();
+                 lcd.setCursor(1,0);
+                 lcd.print("SIGNAL: Excellent");
+                 color(0,255, 0); 
+                
+                 } else if (rssiFromSerial <= -50 && rssiFromSerial >= -59) {
+                 lcd.clear();
+                 lcd.setCursor(2,0);
+                 lcd.print("SIGNAL: Good");
+                 color(0, 0, 255); 
+                
+                 } else if (rssiFromSerial <= -60 && rssiFromSerial >= -69) {
+                 lcd.clear();
+                 lcd.setCursor(2,0);
+                 lcd.print("SIGNAL: Fair");
+                 color(237,109,0);
+                
+                 } else if (rssiFromSerial <= -70) {
+                 lcd.clear();
+                 lcd.setCursor(2,0);
+                 lcd.print("SIGNAL: Poor");
+                 color(255, 0, 0);
+                 }
+                
+                 lcd.setCursor(4, 1);
+                 lcd.print(rssiFromSerial);
+                 lcd.setCursor(8, 1);
+                 lcd.print("dBm");
+                 delay(1000);
+                
+                }
+                
+                void color (unsigned char red, unsigned char green, unsigned char blue) 
+                
+                { 
+                 digitalWrite(redPin, red); 
+                 digitalWrite(bluePin, blue); 
+                 digitalWrite(greenPin, green);
+                }
+                void colorA (unsigned char redA, unsigned char greenA, unsigned char blueA)
+                { 
+                 digitalWrite(redPinA, redA); 
+                 digitalWrite(bluePinA, blueA); 
+                 digitalWrite(greenPinA, greenA); 
+                }
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 1 ЖК-Экран </li>
+            <li> 1 ESP8266 </li>
+            <li> 1 резистор на 10k&Omega; </li>
+            <li> 1 резистор на 20k&Omega; </li>
+            <li> 4 резистора на 220&Omega; </li>
+            <li> 1 светодиод </li>
+            <li> 2 RGB-светодиода </li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        Скорость wifi выведется на LCD 
+        и загорятся светодиоды.
+      </p>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/wifi.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>

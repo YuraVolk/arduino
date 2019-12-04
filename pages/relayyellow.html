@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KSE-M-DC5</title>
+</head>
+<body>
+    <pre>
+        <code>
+        
+
+        #include &lt;EEPROM.h>
+        #include &lt;LiquidCrystal.h>
+        
+        #define DEBUG
+        #define DEBUG_MOTOR_DIRECTIONS
+        
+        LiquidCrystal lcd(10, 9, A2, A3, A4, A5);
+        
+        #define PIN_ENGINE_DIRECTION 	2
+        #define PIN_ENGINE_POWER 		3
+        #define PIN_ENGINE_MOVE_DOWN	4
+        #define PIN_ENGINE_MOVE_UP		5
+        #define PIN_MODE_SELECTION		6
+        #define PIN_DOOR_OPENED  	   11
+        #define PIN_DOOR_CLOSED   	   12
+        #define PIN_LIGHT_SENSOR	   A0
+        #define PIN_TEMPERATURE	   	   A1
+        
+        #define CONST_MOVE_NOT			0
+        #define CONST_MOVE_DIRECTION_1	1
+        #define CONST_MOVE_DIRECTION_2	2
+        #define CONST_BUTTON_PRESSED    LOW
+        
+        #define CONST_INT_MAX		32767
+        #define CONST_INT_MIN	   -32768
+        
+        #ifdef DEBUG
+            #define CONST_LIGHT_CONDITION_TIME_MS	3000
+        #else
+            #define CONST_LIGHT_CONDITION_TIME_MS	300000
+        #endif
+        
+        #define CONST_BUTTON_CONDITION_TIME_MS	1000
+        
+        struct EEPROMData
+        {	
+          bool Initialized;				
+          unsigned int DirectionOpen;		
+          unsigned int DirectionClose;	
+          float MinNightTemperature;	
+          float MaxDayTemperature;			
+          int LightNightValue;				
+          int LightDayValue;				
+        };
+        
+        
+        EEPROMData _enviData = {};		
+        
+        unsigned long auxLightTimeMeas = 0;		
+        unsigned long auxButtonTimeMeas = 0;	
+        
+        #ifdef DEBUG
+        int prevMode = -1;		
+        bool prevBtnUp = false;		
+        bool prevBtnDown = false;	
+        #endif
+        
+        void setup()
+        {
+          Serial.begin(9600);
+        
+          lcd.begin(16, 2);			
+          lcd.print("SM Door System");
+          delay(2000);
+          
+          pinMode(PIN_ENGINE_DIRECTION, OUTPUT);
+          pinMode(PIN_ENGINE_POWER, OUTPUT);
+          pinMode(PIN_MODE_SELECTION, INPUT_PULLUP);
+          pinMode(PIN_ENGINE_MOVE_DOWN, INPUT_PULLUP);
+          pinMode(PIN_ENGINE_MOVE_UP, INPUT_PULLUP);
+          pinMode(PIN_DOOR_OPENED, INPUT_PULLUP);
+          pinMode(PIN_DOOR_CLOSED, INPUT_PULLUP);
+          
+          pinMode(PIN_LIGHT_SENSOR, INPUT);
+          pinMode(PIN_TEMPERATURE, INPUT);
+          
+          EEPROM.get(0, _enviData);
+          if (!_enviData.Initialized)
+          {
+        #ifdef DEBUG
+              Serial.println("Initialization required!");
+        #endif
+        #ifdef DEBUG_MOTOR_DIRECTIONS
+            Serial.println("Creating dummy engine directions:");
+            Serial.println("CONST_MOVE_DIRECTION_1 = close");
+            Serial.println("CONST_MOVE_DIRECTION_2 = open");
+            Serial.println("MinNightTemperature = -5.4");
+            Serial.println("LightNightValue = 30.1");
+            Serial.println("LightNightValue = 540");
+            Serial.println("LightDayValue = 950");
+            
+            _enviData.Initialized = true;
+            _enviData.DirectionClose = CONST_MOVE_DIRECTION_1;
+            _enviData.DirectionOpen = CONST_MOVE_DIRECTION_2;
+            _enviData.MinNightTemperature = -5.4;
+            _enviData.MaxDayTemperature = 30.1;
+            _enviData.LightNightValue = 540;
+            _enviData.LightDayValue = 950;
+            
+            EEPROM.put(0, _enviData);
+        #else
+            InitializeEnvironment();
+        #endif
+          }
+          
+        #ifdef DEBUG
+          Serial.println("Setup ok!");
+        #endif
+          lcd.clear();
+        }
+        
+        void loop()
+        {  
+          int moveDirection = CONST_MOVE_NOT;
+          bool automaticMode = IsAutomaticMode();
+          
+          if (!automaticMode)
+           moveDirection = ManualControlDirection();	
+          else
+            moveDirection = AutomaticControlDirection();
+          
+        #ifdef DEBUG
+          int auxModeVar = digitalRead(PIN_MODE_SELECTION);
+            if (auxModeVar != prevMode)
+            {
+              prevMode = auxModeVar;
+              Serial.print("Mode = ");
+              if (automaticMode)
+                Serial.println("automatic");
+              else
+                Serial.println("manual");
+            }
+        #endif
+          
+         bool opened = IsDoorOpened();
+          bool closed = IsDoorClosed();
+          
+         if ((moveDirection == _enviData.DirectionOpen) && (opened))
+            moveDirection = CONST_MOVE_NOT;
+          
+          if ((moveDirection == _enviData.DirectionClose) && (closed))
+            moveDirection = CONST_MOVE_NOT;
+          
+          MoveEngine(moveDirection);
+          
+          TemperatureCheck();
+          
+          SerialCommunication(); 
+          UpdateInfopanel();
+        }
+        
+        
+        void InitializeEnvironment()
+        {
+        #ifdef DEBUG
+          Serial.println("Initialization started!");
+        #endif
+          
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Engine init");
+          lcd.setCursor(0, 1);
+          lcd.print("required");
+          delay(2000);
+          
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Waitning for");
+          lcd.setCursor(0, 1);
+          lcd.print("door open/close");
+          
+         
+          MoveEngine(CONST_MOVE_NOT);			
+          MoveEngine(CONST_MOVE_DIRECTION_1);	
+          
+        #ifdef DEBUG
+          Serial.println("Engine movement started - to find out movement directions!");
+        #endif
+          
+          bool opened = false;
+          bool closed = false;
+         
+          while(!opened && !closed)
+          {
+            opened = IsDoorOpened();
+            closed = IsDoorClosed();
+          
+          };
+          MoveEngine(CONST_MOVE_NOT);			
+          
+         
+          if (closed)
+          {
+            _enviData.DirectionClose = CONST_MOVE_DIRECTION_1;
+            _enviData.DirectionOpen = CONST_MOVE_DIRECTION_2;
+            
+        #ifdef DEBUG
+            Serial.println("Door closed during initialization");
+              Serial.println("CONST_MOVE_DIRECTION_1 closes door");
+            Serial.println("CONST_MOVE_DIRECTION_2 opens door");
+        #endif
+          }
+          else
+          {
+            _enviData.DirectionClose = CONST_MOVE_DIRECTION_2;
+            _enviData.DirectionOpen = CONST_MOVE_DIRECTION_1;
+        #ifdef DEBUG
+              Serial.println("Door opened during initialization");
+            Serial.println("CONST_MOVE_DIRECTION_1 opens door");
+            Serial.println("CONST_MOVE_DIRECTION_2 closes door");
+        #endif
+          }
+          _enviData.Initialized = true;
+          
+        
+          _enviData.MinNightTemperature =  CONST_INT_MAX;
+          _enviData.MaxDayTemperature =  CONST_INT_MIN;
+          _enviData.LightNightValue =  CONST_INT_MIN;
+          _enviData.LightDayValue =  CONST_INT_MAX;
+         
+          
+          EEPROM.put(0, _enviData);
+          
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("OK");
+          delay(2000);
+        }
+        
+        int ManualControlDirection()
+        {
+          int dir = CONST_MOVE_NOT;
+         
+        #ifdef DEBUG
+          bool btnDown = IsDownPressed();
+          if ((prevBtnDown != btnDown) && btnDown)
+          {
+            prevBtnDown = btnDown;
+            Serial.println("Manual movement DOWN pressed.");
+          }
+          else if (!btnDown)
+            prevBtnDown = false;
+            
+          bool btnUp = IsUpPressed();
+          if ((prevBtnUp != btnUp) && btnUp)
+          {
+            prevBtnUp = btnUp;
+            Serial.println("Manual movement UP pressed.");
+          }
+          else if (!btnUp)
+            prevBtnUp = false;
+        #endif
+          
+          if (IsDownPressed())
+            dir = _enviData.DirectionClose;
+        
+          else if (IsUpPressed())
+            dir = _enviData.DirectionOpen;
+          
+          return dir;
+        }
+        
+        int AutomaticControlDirection()
+        {
+          int dir = CONST_MOVE_NOT;
+          
+          int value = GetLightValue();
+          
+         if (value > _enviData.LightDayValue)
+          {
+            if (!IsDoorOpened())
+            {
+              if (auxLightTimeMeas == 0)
+              {
+                auxLightTimeMeas = millis();
+        #ifdef DEBUG
+                  Serial.println("Started time measurement for automatic door OPENING");
+        #endif 
+              }
+        
+              if ((millis() - auxLightTimeMeas) > CONST_LIGHT_CONDITION_TIME_MS)
+              {
+                dir = _enviData.DirectionOpen;
+        #ifdef DEBUG
+                if (!IsEngineMoving())  
+                  Serial.println("Door opening started.");
+        #endif  
+              }
+            }
+          }
+         else if (value < _enviData.LightNightValue)
+          {
+            if (!IsDoorClosed())
+            {
+              if (auxLightTimeMeas == 0)
+              {
+                  auxLightTimeMeas = millis();
+        #ifdef DEBUG
+                  Serial.println("Started time measurement for automatic door CLOSING");
+        #endif 
+              }
+            
+              if ((millis() - auxLightTimeMeas) > CONST_LIGHT_CONDITION_TIME_MS)
+              {
+                dir = _enviData.DirectionClose;
+          #ifdef DEBUG
+                if (!IsEngineMoving())  
+                    Serial.println("Door closing started.");
+          #endif  
+              }
+            }
+          }
+          else
+          { 
+        #ifdef DEBUG
+              if (auxLightTimeMeas != 0)	
+                Serial.println("STOPPED time measurement for automatic door control");
+        #endif 
+            auxLightTimeMeas = 0;
+          }
+              
+          SetupLightBoundaries(); 
+          
+          return dir;
+        }
+        
+        void MoveEngine(int direction)
+        {
+          if (direction != CONST_MOVE_NOT) 
+          {
+            if (direction == CONST_MOVE_DIRECTION_1)
+                 digitalWrite(PIN_ENGINE_DIRECTION, HIGH);	
+            else if (direction == CONST_MOVE_DIRECTION_2)
+                 digitalWrite(PIN_ENGINE_DIRECTION, LOW);	
+              
+            digitalWrite(PIN_ENGINE_POWER, HIGH);		
+          }
+          else
+          {
+              digitalWrite(PIN_ENGINE_POWER, LOW);		
+            digitalWrite(PIN_ENGINE_DIRECTION, LOW);
+          }
+        }
+        
+        float GetTemperature()
+        {
+           return 0.48828125 * analogRead(PIN_TEMPERATURE) - 50;
+        }
+        
+        void SetupLightBoundaries()
+        {
+          bool down = IsDownPressed();
+          bool up = IsUpPressed();
+        
+          if (down || up)
+          {
+            if ((auxButtonTimeMeas == 0) && ((!prevBtnUp && up) || (!prevBtnDown && down)))
+            {
+                  auxButtonTimeMeas = millis();
+        #ifdef DEBUG
+                  Serial.print("Button time measurement started");
+              if (up)
+                Serial.println(" (up).");
+              else if (down)
+                Serial.println(" (down).");
+        #endif  
+            }
+        
+          if ((millis() - auxButtonTimeMeas) > CONST_BUTTON_CONDITION_TIME_MS)
+            {
+                int value = GetLightValue();	// read light sensor value
+              
+              if (down)
+              {
+                _enviData.LightNightValue = value;
+        #ifdef DEBUG
+                  Serial.print("New value for night light condition: ");
+                  Serial.println(value);
+        #endif 
+              }
+              else if (up)
+              {
+                _enviData.LightDayValue = value;
+        #ifdef DEBUG
+                  Serial.print("New value for day light condition: ");
+                  Serial.println(value);
+        #endif  
+              }
+              
+              EEPROM.put(0, _enviData);
+              auxButtonTimeMeas = millis();	
+            }
+          }
+          else
+          {
+        #ifdef DEBUG
+              if (auxButtonTimeMeas!= 0)
+              Serial.println("No button pressed, time button reset.");
+        #endif 
+            auxButtonTimeMeas = 0;
+          }
+          
+          prevBtnUp = up;
+          prevBtnDown = down;
+        }
+        
+        void TemperatureCheck()
+        {
+          bool opened = IsDoorOpened();
+          bool closed = IsDoorClosed();
+            
+          float temp = GetTemperature();
+          
+          if (opened) {
+            if (temp > _enviData.MaxDayTemperature) {
+                _enviData.MaxDayTemperature = temp;
+                  EEPROM.put(0, _enviData);
+        #ifdef DEBUG
+                  Serial.print("New maximal day temperature: ");
+                  Serial.print(temp, 1);
+                  Serial.println("C");
+        #endif
+            }
+          }
+          else if (closed) {
+            if (temp < _enviData.MinNightTemperature) {
+                _enviData.MinNightTemperature = temp;
+                  EEPROM.put(0, _enviData);
+        #ifdef DEBUG
+                  Serial.print("New minimal night temperature: ");
+                  Serial.print(temp, 1);
+                  Serial.println("C");
+        #endif
+            }
+          }
+          else {
+            
+          }
+        }
+        
+        void SerialCommunication()
+        {
+          if (Serial.available() > 0)
+          {
+            char cmd = Serial.read();
+            if (cmd == 'p')
+            {
+              Serial.print("Min night temperature: ");
+              Serial.println(_enviData.MinNightTemperature);
+              
+              Serial.print("Max day temperature: ");
+              Serial.println(_enviData.MaxDayTemperature);
+              
+              Serial.print("Light value for night:");
+              Serial.println(_enviData.LightNightValue);
+              
+              Serial.print("Light value for day:");
+              Serial.println(_enviData.LightDayValue);
+            }
+            else if (cmd == 'c')
+            {
+                _enviData.MinNightTemperature =  CONST_INT_MAX;
+                  _enviData.MaxDayTemperature =  CONST_INT_MIN;
+                  EEPROM.put(0, _enviData);
+              
+                  Serial.println("Temperatures cleared.");
+            }
+            else if (cmd == '?')
+            {
+              Serial.println("Known commands:");
+              Serial.println("p -  print all relevant data");
+              Serial.println("c -  clears maximal and minimal temperatures");
+            }
+          }
+        }
+        
+        int GetLightValue()
+        {
+          return analogRead(PIN_LIGHT_SENSOR);
+        }
+        
+        bool IsDoorClosed()
+        {
+          return digitalRead(PIN_DOOR_CLOSED) == CONST_BUTTON_PRESSED;
+        }
+                  
+        bool IsDoorOpened()
+        {
+          return digitalRead(PIN_DOOR_OPENED) == CONST_BUTTON_PRESSED;
+        }
+        
+        bool IsAutomaticMode()
+        {
+          return digitalRead(PIN_MODE_SELECTION) == CONST_BUTTON_PRESSED;
+        }
+        
+        bool IsDownPressed()
+        {
+          return digitalRead(PIN_ENGINE_MOVE_DOWN) == CONST_BUTTON_PRESSED;
+        }
+        
+        
+        bool IsUpPressed()
+        {
+          return digitalRead(PIN_ENGINE_MOVE_UP) == CONST_BUTTON_PRESSED;
+        }
+        
+        
+        bool IsEngineMoving()
+        {
+          return digitalRead(PIN_ENGINE_POWER) == HIGH;
+        }
+        
+        void UpdateInfopanel()
+        {
+          //lcd.clear();
+        
+          // pritn current temperature
+          lcd.setCursor(0, 0);
+          lcd.print("T:");
+          lcd.print(GetTemperature());
+          
+          // pritn current light value
+          lcd.setCursor(8, 0);
+          lcd.print("L:");
+          lcd.print(GetLightValue());
+          
+          // print max day temperature
+          lcd.setCursor(0, 1);
+          lcd.print("D:");
+          if (_enviData.MaxDayTemperature == CONST_INT_MIN)
+              lcd.print("---");
+          else
+            lcd.print(_enviData.MaxDayTemperature);
+          
+          // print max day temperature
+          lcd.setCursor(8, 1);
+          lcd.print("N:");
+          if (_enviData.MinNightTemperature == CONST_INT_MAX)
+              lcd.print("---");
+          else
+            lcd.print(_enviData.MinNightTemperature);
+          
+        }
+        
+        </code>
+    </pre>
+    <br><hr><br>
+    <p>
+        Требования:
+        <ul>
+            <li> 1 ЖК-Экран </li>
+            <li> 1 потенциометр на 250k&Omega; </li>
+            <li> 1 TMP36 </li>
+            <li> 1 фоторезистор </li>
+            <li> 1 резистор на 10k&Omega; </li>
+            <li> 1 резистор на 220&Omega; </li>
+            <li> 1 светодиод </li>
+            <li> 2 кнопки </li>
+            <li> 3 ползунковых переключателя </li>
+            <li> 1 источник питания с напряжением 30 и током 3 </li>
+            <li> 1 двигатель постоянного тока </li>
+            <li> 1 однополюсное реле </li>
+            <li> 1 двухполюсное реле </li>
+        </ul>
+      </p>
+    <p>
+        Результат:
+        У вас получится система
+        управления дверями дома.
+        Кол-Во тестов - 17.
+      </p>
+      <br><hr><br>
+    <img alt="arduinoImage" src="../img/relayyellow.PNG">
+    <a href="../index.html" target="_blank">Обратно</a>
+</body>
+</html>
